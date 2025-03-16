@@ -29,3 +29,4 @@ bin/
 .classpath
 .project
 src/net/pumpkin/fmu/core/Test.java
+test/
