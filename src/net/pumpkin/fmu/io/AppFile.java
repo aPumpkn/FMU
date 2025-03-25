@@ -1,7 +1,8 @@
-package net.pumpkin.fmu.core.file;
+package net.pumpkin.fmu.io;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -10,6 +11,11 @@ import java.nio.file.Paths;
 
 import net.pumpkin.fmu.exceptions.DirectoryNotFoundException;
 import net.pumpkin.fmu.exceptions.FileFoundException;
+import net.pumpkin.fmu.io.editor.DataEditor;
+import net.pumpkin.fmu.io.reader.FileReader;
+import net.pumpkin.fmu.io.reader.FmuReader;
+import net.pumpkin.fmu.math.ByteUnit;
+import net.pumpkin.fmu.utils.StringUtils;
 
 public class AppFile {
 
@@ -38,9 +44,8 @@ public class AppFile {
      * path - Relative directory of the file
      * 
      * Returns:
-     * AppFile instance with assigned fields if file does not
-     * exist yet and no IOException is thrown; AppFile instance
-     * with null fields otherwise.
+     * AppFile if file does not exist yet and no exception is 
+     * thrown; null otherwise.
      * 
      * Throws: 
      * FileFoundException if the file already exists
@@ -60,14 +65,14 @@ public class AppFile {
      * path - Relative path of the file
      * 
      * Returns: 
-     * AppFile if the file exists
-     * null if the file does not exist
+     * AppFile if the file exists; null if the file does not 
+     * exist.
      * 
      * Throws:
      * FileNotFoundException if the file doesn't exist
      */
     public static AppFile get(String path) {
-
+        
         return new AppFile(path, false);
         
     }
@@ -112,7 +117,7 @@ public class AppFile {
      */
     public String copy(String path) {
 
-        path = strip(path);
+        path = StringUtils.stripPath(path);
 
         if (!transfer(path)) return null;
         return path + fullname;
@@ -139,7 +144,7 @@ public class AppFile {
      */
     public void move(String path) {
 
-        path = strip(path);
+        path = StringUtils.stripPath(path);
         
         if (!transfer(path)) return;
         delete();
@@ -159,11 +164,11 @@ public class AppFile {
      */
     public void rename(String name) {
         
-        if (!strip(name).replaceAll("/+", "").equals(name))
+        if (!StringUtils.stripPath(name).equals(name))
             throw new IllegalArgumentException("Name cannot include a slash.");
         
         if (type.equals(FileType.BLANK) && name.contains("."))
-            throw new IllegalArgumentException("Name cannot include a period because the FileType is BLANK.");
+            throw new IllegalArgumentException("Name cannot include a period because FileType is 'BLANK'.");
 
         this.name = name;
         String[] nameArr = fullname.split("[.]");
@@ -174,14 +179,12 @@ public class AppFile {
         for (int i = 0; i < pathArr.length - 1; i++)
             newPath += pathArr[i] + "/";
         
-        newPath += fullname;
-        
         Path source = Paths.get(path);
         
         try { Files.move(source, source.resolveSibling(fullname)); }
         catch (IOException e) { e.printStackTrace(); }
         
-        path = newPath;
+        path = newPath + fullname;
         file = new File(path);
         
     }
@@ -191,21 +194,19 @@ public class AppFile {
      */
     private AppFile init(String path, boolean isNew) {
 
-        path = strip(path);
+        path = StringUtils.stripPath(path);
         this.path = path;
         this.file = new File(path);
         
         if (isNew) {
             
             try { if (!file.createNewFile()) throw new FileFoundException(); } 
-            catch (FileFoundException | IOException e) { 
-                
-                e.printStackTrace();
-                
-                this.path = null;
-                this.file = null;
-                
-            } 
+            catch (FileFoundException | IOException e) { e.printStackTrace(); return null; } 
+            
+        } else {
+            
+            try { if (!exists(path)) throw new FileNotFoundException(); }
+            catch (FileNotFoundException e) { e.printStackTrace(); return null; }
             
         }
 
@@ -234,25 +235,18 @@ public class AppFile {
      */
     private boolean transfer(String path) {
         
-        path = strip(path);
+        path = StringUtils.stripPath(path);
         
         try {
             
             if (!Files.isDirectory(Paths.get(path))) 
                 throw new DirectoryNotFoundException();
         
-        } catch (DirectoryNotFoundException e) { 
-            
-            e.printStackTrace();
-            return false;
-            
-        }
+        } catch (DirectoryNotFoundException e) { e.printStackTrace(); return false; }
         
-        path = path.isEmpty() ? "" : path + "/";
-        File newFile = new File(path + fullname);
-        
+        if (!path.isEmpty()) path = path + "/";
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(path));
-             PrintWriter writer = new PrintWriter(newFile)) {
+             PrintWriter writer = new PrintWriter(path + fullname)) {
             
             String line;
             
@@ -260,22 +254,44 @@ public class AppFile {
                 writer.println(line);
             
         } catch (IOException e) { e.printStackTrace(); return false; }
-
+        
         return true;
         
     }
     
     /*
-     * Removes trailing slashes and converts backslashes to
-     * forward slashes.
+     * TODO
      */
-    private String strip(String path) {
+    public DataEditor editor() {
+
+        FileReader reader;
         
-        path = path.replace("\\", "/");
+        switch (type) {
+            
+            case FMU:
+                reader = new FmuReader();
+                break;
+                
+            default:
+                reader = null;
+            
+        } return reader.access(path);
         
-        if (path.startsWith("/")) path = path.substring(1);
-        if (path.endsWith("/")) path = path.substring(0, path.length() - 1);
-        return path;
+    }
+    
+    public long size() {
+        
+        try { return Files.size(Paths.get(path)); }
+        catch (IOException e) { e.printStackTrace(); }
+        return -1L;
+        
+    }
+    
+    public double size(ByteUnit unit) {
+        
+        try { return unit.factor(Files.size(Paths.get(path))); }
+        catch (IOException e) { e.printStackTrace(); }
+        return -1.0;
         
     }
     
