@@ -289,7 +289,7 @@ public class AppFile {
     
     public double size(ByteUnit unit) {
         
-        try { return unit.factor(Files.size(Paths.get(path))); }
+        try { return unit.convert(Files.size(Paths.get(path))); }
         catch (IOException e) { e.printStackTrace(); }
         return -1.0;
         
