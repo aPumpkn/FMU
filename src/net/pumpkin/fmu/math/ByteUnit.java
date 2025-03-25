@@ -2,7 +2,7 @@ package net.pumpkin.fmu.math;
 
 public enum ByteUnit {
     
-    BYTE     ("Byte", 1.0),
+    BYTE     ("Byte",     1.0),
     KILOBYTE ("Kilobyte", 1000.0),
     MEGABYTE ("Megabyte", 1000000.0),
     GIGABYTE ("Gigabyte", 1000000000.0);
