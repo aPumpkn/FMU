@@ -28,5 +28,5 @@ replay_pid*
 bin/
 .classpath
 .project
-src/net/pumpkin/fmu/core/Test.java
+src/net/pumpkin/fmu/Test.java
 test/
