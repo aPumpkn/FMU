@@ -1,4 +1,4 @@
-package net.pumpkin.fmu.core.file;
+package net.pumpkin.fmu.io;
 
 // Representation of a file's extension.
 public enum FileType {
@@ -16,7 +16,7 @@ public enum FileType {
                 return ".fmu";
                 
             case BLANK:
-                return "";
+                return "Blank";
                 
             case UNKNOWN:
                 return "Unknown";
