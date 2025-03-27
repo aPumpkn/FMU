@@ -1,19 +1,16 @@
 package net.pumpkin.fmu.io;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import net.pumpkin.fmu.exceptions.DirectoryNotFoundException;
-import net.pumpkin.fmu.exceptions.FileFoundException;
 import net.pumpkin.fmu.io.editor.DataEditor;
-import net.pumpkin.fmu.io.reader.FileReader;
-import net.pumpkin.fmu.io.reader.FmuReader;
 import net.pumpkin.fmu.math.ByteUnit;
 import net.pumpkin.fmu.utils.StringUtils;
 
@@ -22,7 +19,6 @@ public class AppFile {
     private String path;     // Relative path of the file.
     private String name;     // The File name.
     private String fullname; // The full File name (extension included).
-    private File file;       // For making changes to the file.
     private FileType type;   // The file extension.
     
     
@@ -42,10 +38,6 @@ public class AppFile {
      * 
      * Params: 
      * path - Relative directory of the file
-     * 
-     * Returns:
-     * AppFile if file does not exist yet and no exception is 
-     * thrown; null otherwise.
      * 
      * Throws: 
      * FileFoundException if the file already exists
@@ -129,7 +121,8 @@ public class AppFile {
      */
     public void delete() {
 
-        file.delete();
+        try { Files.delete(Paths.get(path)); } 
+        catch (IOException e) { e.printStackTrace(); }
         
     }
 
@@ -150,7 +143,6 @@ public class AppFile {
         delete();
         
         this.path = path + "/" + fullname;
-        this.file = new File(this.path);
         
     }
     
@@ -185,7 +177,6 @@ public class AppFile {
         catch (IOException e) { e.printStackTrace(); }
         
         path = newPath + fullname;
-        file = new File(path);
         
     }
     
@@ -196,12 +187,12 @@ public class AppFile {
 
         path = StringUtils.stripPath(path);
         this.path = path;
-        this.file = new File(path);
         
         if (isNew) {
             
-            try { if (!file.createNewFile()) throw new FileFoundException(); } 
-            catch (FileFoundException | IOException e) { e.printStackTrace(); return null; } 
+            try { Files.createFile(Paths.get(path)); } 
+            catch (FileAlreadyExistsException e) { e.printStackTrace(); return null; }
+            catch (IOException e) { e.printStackTrace(); return null; } 
             
         } else {
             
@@ -259,23 +250,9 @@ public class AppFile {
         
     }
     
-    /*
-     * TODO
-     */
     public DataEditor editor() {
-
-        FileReader reader;
         
-        switch (type) {
-            
-            case FMU:
-                reader = new FmuReader();
-                break;
-                
-            default:
-                reader = null;
-            
-        } return reader.access(path);
+        return Formatter.resolveEditor(this);
         
     }
     
