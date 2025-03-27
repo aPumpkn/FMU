@@ -26,7 +26,7 @@ public class FmuReader implements FileReader {
             if (content.endsWith("{")) {
                 
                 String key = content.substring(0, content.length() - 2);
-                path += path.isEmpty() ? key : path + "/" + key;
+                path = path.isEmpty() ? key : path + "/" + key;
                 
                 storage.put(path, null);
                 
@@ -44,7 +44,7 @@ public class FmuReader implements FileReader {
             } else if (content.contains(":")) {
                 
                 String[] split = content.split(":");
-                String key = path + "/" + split[0].trim();
+                String key = path.isEmpty() ? split[0].trim() : path + "/" + split[0].trim();
                 String value = split.length == 1 ? "" : split[1].trim();
                 
                 if (value.equals("[")) {
