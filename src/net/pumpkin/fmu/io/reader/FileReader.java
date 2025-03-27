@@ -27,7 +27,7 @@ public interface FileReader {
             
         } catch (IOException e) { e.printStackTrace(); }
         
-        return new DataContainer(map);
+        return new DataContainer(path, map);
         
     }
     
