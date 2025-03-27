@@ -1,9 +1,15 @@
 package net.pumpkin.fmu.io.editor;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.pumpkin.fmu.exceptions.EntryFoundException;
+import net.pumpkin.fmu.exceptions.EntryNotFoundException;
+import net.pumpkin.fmu.exceptions.FieldFoundException;
+import net.pumpkin.fmu.exceptions.FieldNotFoundException;
+import net.pumpkin.fmu.io.Formatter;
 import net.pumpkin.fmu.utils.StringUtils;
 
 /*
@@ -17,10 +23,14 @@ import net.pumpkin.fmu.utils.StringUtils;
 public class DataContainer implements DataEditor {
     
     private Map<String,String> storage;
+    private String filepath;
+    private boolean isChanged;
     
-    public DataContainer(Map<String,String> storage) {
+    public DataContainer(String filepath, Map<String,String> storage) {
         
+        this.filepath = filepath;
         this.storage = storage;
+        isChanged = false;
         
     }
 
@@ -28,6 +38,7 @@ public class DataContainer implements DataEditor {
     public String getEntry(String path) {
         
         return storage.get(StringUtils.stripPath(path));
+        
     }
 
     @Override
@@ -36,19 +47,50 @@ public class DataContainer implements DataEditor {
         Map<String,String> entries = new LinkedHashMap<>(); 
         path = StringUtils.stripPath(path);
         boolean found = false;
+        int pathCount = path.split("/").length;
         
         for (String key : storage.keySet()) {
+            
+            int currentPathCount = key.split("/").length;
             
             if (!found) {
                 
                 if (key.equals(path)) found = true;
                 
-            } else if (!key.contains(path)) break;  
-              else {
+            } else if (pathCount == currentPathCount + 1) {
                 
-                if (storage.get(key) != null);
+                String value = storage.get(key);
+                  
+                if (value != null) entries.put(key, value);
                 
-            }
+            } else if (pathCount <= currentPathCount) break;  
+            
+        }
+        
+        return entries;
+        
+    }
+
+    @Override
+    public List<String> getFields(String path) {
+        
+        List<String> fields = new LinkedList<>();
+        boolean found = false;
+        int pathCount = path.split("/").length;
+        
+        for (String key : storage.keySet()) {
+            
+            int currentPathCount = key.split("/").length;
+            
+            if (!found) {
+                
+                if (key.equals(path)) found = true;
+                
+            } else if (pathCount == currentPathCount + 1) {
+                
+                if (storage.get(key) == null) fields.add(key);
+                
+            } else if (pathCount <= currentPathCount) break;
             
         }
         
@@ -57,64 +99,196 @@ public class DataContainer implements DataEditor {
     }
 
     @Override
-    public List<String> getFields(String path) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean hasEntry(String path) {
-        // TODO Auto-generated method stub
-        return false;
+        
+        String value = storage.get(StringUtils.stripPath(path));
+        
+        if (value == null) return false;
+        return true;
+        
     }
 
     @Override
     public boolean hasField(String path) {
-        // TODO Auto-generated method stub
+        
+        String key = StringUtils.stripPath(path);
+        String value = storage.get(key);
+        
+        if (storage.containsKey(key) && value == null) return true;
         return false;
+        
     }
 
     @Override
     public DataEditor addEntry(String path, Object value) {
-        // TODO Auto-generated method stub
+        
+        try {
+            
+            path = StringUtils.stripPath(path);
+            
+            if (storage.get(path) != null)
+                throw new EntryFoundException();
+            
+            storage.put(path, String.valueOf(value));
+            
+            if (!isChanged) isChanged = true;
+            
+        } catch (EntryFoundException e) { e.printStackTrace(); }
+        
         return this;
+        
+    }
+
+    @Override
+    public DataEditor renameEntry(String path, String name) {
+
+        try {
+            
+            path = StringUtils.stripPath(path);
+            String value = storage.get(path);
+            
+            if (value != null)
+                throw new FieldNotFoundException();
+
+            storage.remove(path);
+            
+            String[] pathArr = path.split("/");
+            path = "";
+            
+            for (int i = 0; i < pathArr.length - 1; i++)
+                path += pathArr[i] + "/";
+            
+            storage.put(path + name, value);
+            
+            if (!isChanged) isChanged = true;
+            
+        } catch (FieldNotFoundException e) { e.printStackTrace(); }
+        
+        return this;
+        
     }
 
     @Override
     public DataEditor editEntry(String path, Object value) {
-        // TODO Auto-generated method stub
+        
+        try {
+            
+            path = StringUtils.stripPath(path);
+            
+            if (storage.get(path) == null)
+                throw new EntryNotFoundException();
+            
+            storage.put(path, String.valueOf(value));
+            
+            if (!isChanged) isChanged = true;
+            
+        } catch (EntryNotFoundException e) { e.printStackTrace(); }
+        
         return this;
+        
     }
 
     @Override
     public DataEditor removeEntry(String path) {
-        // TODO Auto-generated method stub
+
+        try {
+            
+            path = StringUtils.stripPath(path);
+            
+            if (storage.get(path) == null)
+                throw new EntryNotFoundException();
+            
+            storage.remove(path);
+            
+            if (!isChanged) isChanged = true;
+            
+        } catch (EntryNotFoundException e) { e.printStackTrace(); }
+        
         return this;
+        
     }
 
     @Override
     public DataEditor addField(String path) {
-        // TODO Auto-generated method stub
+        
+        try {
+            
+            path = StringUtils.stripPath(path);
+            
+            if (storage.containsKey(path) && storage.get(path) == null)
+                throw new FieldFoundException();
+            
+            storage.put(path, null);
+            
+            if (!isChanged) isChanged = true;
+            
+        } catch (FieldFoundException e) { e.printStackTrace(); }
+        
         return this;
+        
     }
 
     @Override
     public DataEditor renameField(String path, String name) {
-        // TODO Auto-generated method stub
+
+        try {
+            
+            path = StringUtils.stripPath(path);
+            
+            if (!storage.containsKey(path) || storage.get(path) != null)
+                throw new FieldNotFoundException();
+
+            storage.remove(path);
+            
+            String[] pathArr = path.split("/");
+            path = "";
+            
+            for (int i = 0; i < pathArr.length - 1; i++)
+                path += pathArr[i] + "/";
+
+            storage.put(path + name, null);
+            
+            if (!isChanged) isChanged = true;
+            
+        } catch (FieldNotFoundException e) { e.printStackTrace(); }
+        
         return this;
+        
     }
 
     @Override
     public DataEditor removeField(String path) {
-        // TODO Auto-generated method stub
+        
+        try {
+            
+            path = StringUtils.stripPath(path);
+            
+            if (!storage.containsKey(path) || storage.get(path) != null)
+                throw new FieldNotFoundException();
+            
+            storage.remove(path);
+            
+            if (!isChanged) isChanged = true;
+            
+        } catch (FieldNotFoundException e) { e.printStackTrace(); }
+        
         return this;
+        
     }
 
     /*
      * Calls on FileFormat to overwrite the file with 
      */
+    @Override
     public void complete() {
-        // TODO Auto-generated method stub
+        
+        try {
+        
+            if (!isChanged) throw new Exception("There are no changes in the file to be made.");
+            
+            Formatter.resolveStorage(filepath, storage);
+        
+        } catch (Exception e) { e.printStackTrace(); }
         
     }
     
