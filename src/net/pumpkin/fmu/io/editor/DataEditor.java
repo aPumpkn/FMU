@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public interface DataEditor {
     
-    String getEntry(String path);
+    String get(String path);
     Map<String,String> getEntries(String path);
     Collection<String> getFields(String path);
     boolean hasEntry(String path);
@@ -27,9 +27,8 @@ public interface DataEditor {
     DataEditor editEntry(String path, Object value);
     DataEditor removeEntry(String path);
     DataEditor addField(String path);
+    DataEditor addFields(String path);
     DataEditor renameField(String path, String name);
     DataEditor removeField(String path);
-    
-    void complete();
     
 }
