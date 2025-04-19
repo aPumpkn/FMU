@@ -6,7 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
 
-import net.pumpkin.fmu.io.editor.DataContainer;
+import net.pumpkin.fmu.io.editor.MemoryEditor;
 
 /*
  * Responsible for reading the full contents of a file.
@@ -17,7 +17,7 @@ public interface FileReader {
      * Accesses the file and returns a new DataContainer with all
      * the retrievable data. 
      */
-    default DataContainer access(String path) {
+    default MemoryEditor access(String path) {
         
         Map<String,String> map = null;
         
@@ -27,7 +27,7 @@ public interface FileReader {
             
         } catch (IOException e) { e.printStackTrace(); }
         
-        return new DataContainer(path, map);
+        return new MemoryEditor(path, map);
         
     }
     
