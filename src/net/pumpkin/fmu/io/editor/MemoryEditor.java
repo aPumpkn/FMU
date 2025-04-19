@@ -20,13 +20,13 @@ import net.pumpkin.fmu.utils.StringUtils;
  * when bulk-editing, however it can be counter-productive if 
  * only a simple entry or edit is needed in a large file.
  */
-public class DataContainer implements DataEditor {
+public class MemoryEditor implements DataEditor, TaskQueue {
     
     private Map<String,String> storage;
     private String filepath;
     private boolean isChanged;
     
-    public DataContainer(String filepath, Map<String,String> storage) {
+    public MemoryEditor(String filepath, Map<String,String> storage) {
         
         this.filepath = filepath;
         this.storage = storage;
@@ -35,7 +35,7 @@ public class DataContainer implements DataEditor {
     }
 
     @Override
-    public String getEntry(String path) {
+    public String get(String path) {
         
         return storage.get(StringUtils.stripPath(path));
         
@@ -43,27 +43,26 @@ public class DataContainer implements DataEditor {
 
     @Override
     public Map<String,String> getEntries(String path) {
-        
-        Map<String,String> entries = new LinkedHashMap<>(); 
+
         path = StringUtils.stripPath(path);
-        boolean found = false;
-        int pathCount = path.split("/").length;
+        Map<String,String> entries = new LinkedHashMap<>(); 
+        int pathLength = path.isEmpty() ? 0 : path.split("/").length;
         
         for (String key : storage.keySet()) {
             
-            int currentPathCount = key.split("/").length;
+            String value = storage.get(key);
+            String[] split = key.split("/");
+            int keyLength = split.length;
+            String name = split[keyLength - 1];
+            String parent = "";
             
-            if (!found) {
-                
-                if (key.equals(path)) found = true;
-                
-            } else if (pathCount == currentPathCount + 1) {
-                
-                String value = storage.get(key);
-                  
-                if (value != null) entries.put(key, value);
-                
-            } else if (pathCount <= currentPathCount) break;  
+            for (int i = 0; i < keyLength - 1; i++)
+                parent += split[i] + "/";
+            
+            if (!parent.isEmpty()) parent.substring(0, parent.length() - 1);
+            if (value == null) continue;
+            if (keyLength == pathLength + 1 && key.contains(path)) 
+                entries.put(name, value);
             
         }
         
@@ -73,28 +72,30 @@ public class DataContainer implements DataEditor {
 
     @Override
     public List<String> getFields(String path) {
-        
+
+        path = StringUtils.stripPath(path);
         List<String> fields = new LinkedList<>();
-        boolean found = false;
-        int pathCount = path.split("/").length;
+        int pathLength = path.isEmpty() ? 0 : path.split("/").length; 
         
         for (String key : storage.keySet()) {
             
-            int currentPathCount = key.split("/").length;
+            String value = storage.get(key);
+            String[] split = key.split("/");
+            int keyLength = split.length;
+            String name = split[keyLength - 1];
+            String parent = "";
             
-            if (!found) {
-                
-                if (key.equals(path)) found = true;
-                
-            } else if (pathCount == currentPathCount + 1) {
-                
-                if (storage.get(key) == null) fields.add(key);
-                
-            } else if (pathCount <= currentPathCount) break;
+            for (int i = 0; i < keyLength - 1; i++)
+                parent += split[i] + "/";
+            
+            if (!parent.isEmpty()) parent.substring(0, parent.length() - 1);
+            if (value != null) continue;
+            if (keyLength == pathLength + 1 && key.contains(path)) 
+                fields.add(name);
             
         }
         
-        return null;
+        return fields;
         
     }
 
@@ -129,11 +130,25 @@ public class DataContainer implements DataEditor {
             if (storage.get(path) != null)
                 throw new EntryFoundException();
             
+            if (!path.isEmpty()) {
+                
+                String[] pathing = path.split("/");
+                String parent = "";
+                
+                for (int i = 0; i < pathing.length - 1; i++)
+                    parent += pathing[i] + "/";
+                
+                if (!parent.isEmpty()) parent = parent.substring(0, parent.length() - 1);
+                if (!hasField(parent)) throw new Exception("The parent pathing does not exist.");
+            
+            }
+            
             storage.put(path, String.valueOf(value));
             
             if (!isChanged) isChanged = true;
             
-        } catch (EntryFoundException e) { e.printStackTrace(); }
+        } catch (EntryFoundException e) { e.printStackTrace(); } 
+          catch (Exception e) { e.printStackTrace(); }
         
         return this;
         
@@ -218,16 +233,65 @@ public class DataContainer implements DataEditor {
             if (storage.containsKey(path) && storage.get(path) == null)
                 throw new FieldFoundException();
             
+            if (!path.isEmpty()) {
+                
+                String[] pathing = path.split("/");
+                String parent = "";
+                
+                for (int i = 0; i < pathing.length - 1; i++) 
+                    parent += pathing[i] + "/";
+                
+                if (!hasField(parent)) throw new FieldNotFoundException();
+                
+            }
+            
             storage.put(path, null);
             
             if (!isChanged) isChanged = true;
             
-        } catch (FieldFoundException e) { e.printStackTrace(); }
+        } catch (FieldFoundException e) { e.printStackTrace(); } 
+          catch (FieldNotFoundException e) { e.printStackTrace(); }
         
         return this;
         
     }
 
+    @Override
+    public DataEditor addFields(String path) {
+        
+        try {
+            
+            path = StringUtils.stripPath(path);
+            
+            if (storage.containsKey(path) && storage.get(path) == null)
+                throw new FieldFoundException();
+            
+            if (!path.isEmpty()) {
+                
+                String[] pathing = path.split("/");
+                String parent = "";
+                
+                for (int i = 0; i < pathing.length - 1; i++) {
+                    
+                    parent += pathing[i] + "/";
+                    
+                    if (!hasField(parent)) storage.put(parent.substring(0, parent.length() - 1), null);
+                    
+                }
+            
+            }
+            
+            storage.put(path, null);
+            
+            if (!isChanged) isChanged = true;
+            
+        } catch (FieldFoundException e) { e.printStackTrace(); } 
+          catch (Exception e) { e.printStackTrace(); }
+        
+        return this;
+        
+    }
+    
     @Override
     public DataEditor renameField(String path, String name) {
 
@@ -246,6 +310,8 @@ public class DataContainer implements DataEditor {
             for (int i = 0; i < pathArr.length - 1; i++)
                 path += pathArr[i] + "/";
 
+            if (!path.isEmpty()) path = path.substring(0, path.length() - 1);
+            
             storage.put(path + name, null);
             
             if (!isChanged) isChanged = true;
@@ -286,7 +352,8 @@ public class DataContainer implements DataEditor {
         
             if (!isChanged) throw new Exception("There are no changes in the file to be made.");
             
-            Formatter.resolveStorage(filepath, storage);
+            System.out.println(storage);
+            Formatter.store(filepath, storage);
         
         } catch (Exception e) { e.printStackTrace(); }
         
