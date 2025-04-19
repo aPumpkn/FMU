@@ -1,15 +1,12 @@
 package net.pumpkin.fmu.io;
 
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import net.pumpkin.fmu.exceptions.DirectoryNotFoundException;
 import net.pumpkin.fmu.io.editor.DataEditor;
 import net.pumpkin.fmu.math.ByteUnit;
 import net.pumpkin.fmu.utils.StringUtils;
@@ -23,7 +20,7 @@ public class AppFile {
     
     
     
-        // -- INSTANCES -- \\
+        // -- CONSTRUCTORS -- \\
     
     private AppFile(String path, boolean isNew) {
 
@@ -49,6 +46,12 @@ public class AppFile {
         
     }
     
+    
+    
+    
+    
+        // -- STATIC -- \\
+    
     /*
      * Attempts to create an AppFile instance with an already
      * existing file, located using the relative path.
@@ -68,10 +71,6 @@ public class AppFile {
         return new AppFile(path, false);
         
     }
-    
-    
-    
-        // -- STATIC -- \\
     
     /*
      * If a file with this exact name and directory exists.
@@ -110,9 +109,21 @@ public class AppFile {
     public String copy(String path) {
 
         path = StringUtils.stripPath(path);
-
-        if (!transfer(path)) return null;
-        return path + fullname;
+        String target = path.isEmpty() ? fullname : path + "/" + fullname;
+        Path source = Paths.get(this.path);
+        Path dest = Paths.get(target);
+        
+        try {
+            
+            Files.copy(source, dest);
+            
+            this.path = path + "/" + fullname;
+            
+            return target;
+            
+        } catch (IOException e) { e.printStackTrace(); }
+        
+        return null;
         
     }
     
@@ -138,11 +149,17 @@ public class AppFile {
     public void move(String path) {
 
         path = StringUtils.stripPath(path);
+        String target = path.isEmpty() ? fullname : path + "/" + fullname;
+        Path source = Paths.get(this.path);
+        Path dest = Paths.get(target);
         
-        if (!transfer(path)) return;
-        delete();
-        
-        this.path = path + "/" + fullname;
+        try {
+            
+            Files.move(source, dest);
+            
+            this.path = path + "/" + fullname;
+            
+        } catch (IOException e) { e.printStackTrace(); }
         
     }
     
@@ -218,41 +235,9 @@ public class AppFile {
         
     }
     
-    /* 
-     * Sends data from the current file to the given path. If
-     * the file exists, it will be overwritten.
-     * 
-     * returns true if no exceptions occurred; false otherwise.
-     */
-    private boolean transfer(String path) {
-        
-        path = StringUtils.stripPath(path);
-        
-        try {
-            
-            if (!Files.isDirectory(Paths.get(path))) 
-                throw new DirectoryNotFoundException();
-        
-        } catch (DirectoryNotFoundException e) { e.printStackTrace(); return false; }
-        
-        if (!path.isEmpty()) path = path + "/";
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get(path));
-             PrintWriter writer = new PrintWriter(path + fullname)) {
-            
-            String line;
-            
-            while ((line = reader.readLine()) != null) 
-                writer.println(line);
-            
-        } catch (IOException e) { e.printStackTrace(); return false; }
-        
-        return true;
-        
-    }
-    
     public DataEditor editor() {
         
-        return Formatter.resolveEditor(this);
+        return Formatter.editor(this);
         
     }
     
