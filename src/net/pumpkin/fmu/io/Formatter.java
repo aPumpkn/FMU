@@ -16,7 +16,7 @@ final public class Formatter {
     /*
      * Decides what reader should be used.
      */
-    public static DataEditor resolveEditor(AppFile file) {
+    public static DataEditor editor(AppFile file) {
         
         FileReader reader;
         FileType type = file.getType();
@@ -34,7 +34,7 @@ final public class Formatter {
         
     }
     
-    public static void resolveStorage(String path, Map<String,String> storage) {
+    public static void store(String path, Map<String,String> storage) {
         
         if (path.endsWith(".fmu")) FmuEditor.store(path, storage);
         
