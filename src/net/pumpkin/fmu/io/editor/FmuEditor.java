@@ -2,8 +2,8 @@ package net.pumpkin.fmu.io.editor;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -12,7 +12,7 @@ import net.pumpkin.fmu.utils.StringUtils;
 public class FmuEditor implements DataEditor {
 
     @Override
-    public String getEntry(String path) {
+    public String get(String path) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -24,7 +24,7 @@ public class FmuEditor implements DataEditor {
     }
 
     @Override
-    public Collection<String> getFields(String path) {
+    public List<String> getFields(String path) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -72,6 +72,12 @@ public class FmuEditor implements DataEditor {
     }
 
     @Override
+    public DataEditor addFields(String path) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
     public DataEditor renameField(String path, String name) {
         // TODO Auto-generated method stub
         return null;
@@ -83,7 +89,7 @@ public class FmuEditor implements DataEditor {
         return null;
     }
     
-    public static void store(String path, Map<String,String> storage) {
+    public static void store(String path, Map<String,String> bag) {
         
         try (PrintWriter writer = new PrintWriter(path)) {
             
@@ -91,15 +97,13 @@ public class FmuEditor implements DataEditor {
              * TODO: Add support for arrays
              */
             
-            Map<String,String> queue = new LinkedHashMap<>();
-            String indent = "";
-            String search = "";
-            boolean done = false;
+            Map<String,String> queue = new LinkedHashMap<>(); // Elements to store for a given path
+            String indent = ""; // tab for readability
+            String search = ""; // the current navigational path
             
-            while (!storage.isEmpty()) {
+            while (!bag.isEmpty()) {
                 
-                // get all elements in the corresponding path
-                for (Entry<String,String> entry : storage.entrySet()) {
+                for (Entry<String,String> entry : bag.entrySet()) { // Setup the queue for this path
                     
                     String[] split = entry.getKey().split("/");
                     String key = split[split.length - 1];
@@ -111,10 +115,10 @@ public class FmuEditor implements DataEditor {
                     if (!parent.isEmpty()) parent = parent.substring(0, parent.length() - 1);                    
                     if (search.equals(parent)) queue.put(entry.getKey(), entry.getValue());
                     
-                } if (!queue.isEmpty()) {
+                } if (!queue.isEmpty()) { // if we have elements to write
                     
-                    for (Entry<String,String> entry : queue.entrySet()) { // set down all entries first
-
+                    for (Entry<String,String> entry : queue.entrySet()) { // set down all entries first, if any
+                        
                         String[] split = entry.getKey().split("/");
                         String key = split[split.length - 1];
                         String value = entry.getValue();
@@ -122,14 +126,12 @@ public class FmuEditor implements DataEditor {
                         if (value != null) {
                             
                             writer.println(indent + key + ": " + value);
-                            storage.remove(entry.getKey());
-
-                            if (storage.isEmpty()) done = true;
+                            bag.remove(entry.getKey());
                             
                         }
                         
-                    } for (String i : queue.keySet()) { // then get the first field
-
+                    } for (String i : queue.keySet()) { // if there are any fields in queue, write the first one and update the search query
+                        
                         String value = queue.get(i);
                         String[] split = i.split("/");
                         String key = split[split.length - 1];
@@ -137,9 +139,7 @@ public class FmuEditor implements DataEditor {
                         if (value == null) {
                             
                             writer.println(indent + key + " {");
-                            storage.remove(i);
-                            
-                            if (storage.isEmpty()) done = true;
+                            bag.remove(i);
                             
                             search = search.isEmpty() ? key : search + "/" + key;
                             indent += StringUtils.TAB;
@@ -149,9 +149,9 @@ public class FmuEditor implements DataEditor {
                         
                     }
                     
-                    queue.clear();
+                    queue.clear(); // queue is complete
                     
-                } else if (!done && !indent.isEmpty()) { // Go back one step in the file's pathing.
+                } else if (!bag.isEmpty() && !indent.isEmpty()) { // Nothing left to write here, so go back one navigational step if possible.
                     
                     indent = indent.substring(4);
                     String[] split = search.split("/");
@@ -164,9 +164,9 @@ public class FmuEditor implements DataEditor {
                     
                     writer.println(indent + "}");
                     
-                } if (done) while (!indent.isEmpty()) {
+                } if (bag.isEmpty()) while (!indent.isEmpty()) {
                     
-                    // There's nothing left, wrap it up.
+                    // There's nothing left to write, so wrap it up.
                     indent = indent.substring(4);
                     writer.println(indent + "}");
                         
@@ -175,11 +175,6 @@ public class FmuEditor implements DataEditor {
             }
             
         } catch (FileNotFoundException e) { e.printStackTrace(); }
-        
-    }
-
-    @Override
-    public void complete() {
         
     }
     
