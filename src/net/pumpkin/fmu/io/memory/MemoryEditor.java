@@ -1,4 +1,4 @@
-package net.pumpkin.fmu.io.editor;
+package net.pumpkin.fmu.io.memory;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -9,7 +9,10 @@ import net.pumpkin.fmu.exceptions.EntryFoundException;
 import net.pumpkin.fmu.exceptions.EntryNotFoundException;
 import net.pumpkin.fmu.exceptions.FieldFoundException;
 import net.pumpkin.fmu.exceptions.FieldNotFoundException;
-import net.pumpkin.fmu.io.Formatter;
+import net.pumpkin.fmu.io.AppFile;
+import net.pumpkin.fmu.io.DataEditor;
+import net.pumpkin.fmu.io.memory.writer.FmuWriter;
+import net.pumpkin.fmu.io.memory.writer.TextFileWriter;
 import net.pumpkin.fmu.utils.StringUtils;
 
 /*
@@ -20,15 +23,15 @@ import net.pumpkin.fmu.utils.StringUtils;
  * when bulk-editing, however it can be counter-productive if 
  * only a simple entry or edit is needed in a large file.
  */
-public class MemoryEditor implements DataEditor, TaskQueue {
+public class MemoryEditor implements DataEditor {
     
     private Map<String,String> storage;
-    private String filepath;
+    private AppFile file;
     private boolean isChanged;
     
-    public MemoryEditor(String filepath, Map<String,String> storage) {
+    public MemoryEditor(AppFile file, Map<String,String> storage) {
         
-        this.filepath = filepath;
+        this.file = file;
         this.storage = storage;
         isChanged = false;
         
@@ -352,9 +355,21 @@ public class MemoryEditor implements DataEditor, TaskQueue {
         
             if (!isChanged) throw new Exception("There are no changes in the file to be made.");
             
-            System.out.println(storage);
-            Formatter.store(filepath, storage);
-        
+            TextFileWriter writer;
+            
+            switch (file.getType()) {
+                
+                case FMU:
+                    writer = new FmuWriter();
+                    break;
+                    
+                default:
+                    writer = null;
+                
+            }
+            
+            writer.store(file.getPath(), storage);
+            
         } catch (Exception e) { e.printStackTrace(); }
         
     }

@@ -1,4 +1,4 @@
-package net.pumpkin.fmu.io.editor;
+package net.pumpkin.fmu.io;
 
 import java.util.Collection;
 import java.util.Map;
@@ -30,5 +30,7 @@ public interface DataEditor {
     DataEditor addFields(String path);
     DataEditor renameField(String path, String name);
     DataEditor removeField(String path);
+    
+    void complete();
     
 }

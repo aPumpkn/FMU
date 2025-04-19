@@ -1,4 +1,4 @@
-package net.pumpkin.fmu.io.reader;
+package net.pumpkin.fmu.io.memory.reader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,33 +6,35 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
 
-import net.pumpkin.fmu.io.editor.MemoryEditor;
+import net.pumpkin.fmu.io.AppFile;
+import net.pumpkin.fmu.io.memory.MemoryEditor;
 
 /*
  * Responsible for reading the full contents of a file.
  */
-public interface FileReader {
+@FunctionalInterface
+public interface TextFileReader {
     
     /*
-     * Accesses the file and returns a new DataContainer with all
+     * Accesses the file and returns a new MemoryEditor with all
      * the retrievable data. 
      */
-    default MemoryEditor access(String path) {
+    default MemoryEditor extract(AppFile file) {
         
         Map<String,String> map = null;
         
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get(path))) {
+        try (BufferedReader reader = Files.newBufferedReader(Paths.get(file.getPath()))) { 
             
             map = read(reader);
             
         } catch (IOException e) { e.printStackTrace(); }
         
-        return new MemoryEditor(path, map);
+        return new MemoryEditor(file, map);
         
     }
     
     /*
-     * Let the Format class implementing this interface determine how 
+     * Let the Reader implementing this interface determine how 
      * the file should be read.
      */
     Map<String,String> read(BufferedReader reader) throws IOException;

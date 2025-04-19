@@ -7,7 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import net.pumpkin.fmu.io.editor.DataEditor;
+import net.pumpkin.fmu.io.memory.reader.TextFileReader;
+import net.pumpkin.fmu.io.memory.reader.FmuReader;
 import net.pumpkin.fmu.math.ByteUnit;
 import net.pumpkin.fmu.utils.StringUtils;
 
@@ -236,8 +237,19 @@ public class AppFile {
     }
     
     public DataEditor editor() {
+
+        TextFileReader reader;
         
-        return Formatter.editor(this);
+        switch (type) {
+            
+            case FMU:
+                reader = new FmuReader();
+                break;
+                
+            default:
+                reader = null;
+            
+        } return reader.extract(this);
         
     }
     
