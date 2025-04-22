@@ -1,14 +1,15 @@
-package net.pumpkin.fmu.io.file.editor;
+package net.pumpkin.fmu.io.editor.external;
 
 import java.util.List;
 import java.util.Map;
 
-import net.pumpkin.fmu.io.DataEditor;
+import net.pumpkin.fmu.io.editor.DataEditor;
+import net.pumpkin.fmu.io.editor.DataType;
 
 public class FmuEditor implements DataEditor {
 
     @Override
-    public String get(String path) {
+    public <T> T get(String path, DataType type) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -26,7 +27,7 @@ public class FmuEditor implements DataEditor {
     }
 
     @Override
-    public boolean hasEntry(String path) {
+    public boolean has(String path) {
         // TODO Auto-generated method stub
         return false;
     }
@@ -38,25 +39,25 @@ public class FmuEditor implements DataEditor {
     }
 
     @Override
-    public DataEditor addEntry(String path, Object value) {
+    public DataEditor add(String path, Object value) {
         // TODO Auto-generated method stub
         return this;
     }
 
     @Override
-    public DataEditor renameEntry(String path, String name) {
+    public DataEditor rename(String path, String name) {
         // TODO Auto-generated method stub
         return this;
     }
 
     @Override
-    public DataEditor editEntry(String path, Object value) {
+    public DataEditor edit(String path, Object value) {
         // TODO Auto-generated method stub
         return this;
     }
 
     @Override
-    public DataEditor removeEntry(String path) {
+    public DataEditor remove(String path) {
         // TODO Auto-generated method stub
         return this;
     }
@@ -87,9 +88,8 @@ public class FmuEditor implements DataEditor {
     
     @Override
     public void complete() {
-        
-        
-        
+        // TODO Auto-generated method stub
+        return;
     }
     
 }

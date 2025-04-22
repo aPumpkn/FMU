@@ -1,4 +1,4 @@
-package net.pumpkin.fmu.io.memory.reader;
+package net.pumpkin.fmu.io.reader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 
 import net.pumpkin.fmu.io.AppFile;
-import net.pumpkin.fmu.io.memory.MemoryEditor;
+import net.pumpkin.fmu.io.editor.internal.MemoryEditor;
 
 /*
  * Responsible for reading the full contents of a file.

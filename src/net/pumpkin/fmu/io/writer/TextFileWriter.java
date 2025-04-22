@@ -1,4 +1,4 @@
-package net.pumpkin.fmu.io.memory.writer;
+package net.pumpkin.fmu.io.writer;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
