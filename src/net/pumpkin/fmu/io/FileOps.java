@@ -15,7 +15,7 @@ final public class FileOps {
     public interface FunctionalBufferedReader { void read(BufferedReader reader) throws IOException, SecurityException; }
 
     @FunctionalInterface
-    public interface FunctionalBufferedLineReader { void read(BufferedReader reader, String line) throws IOException, SecurityException; }
+    public interface FunctionalBufferedLineReader { void read(BufferedReader reader, String line, String search) throws IOException, SecurityException; }
 
     @FunctionalInterface
     public interface FunctionalPrintWriter { void write(PrintWriter writer); }
@@ -40,9 +40,10 @@ final public class FileOps {
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(path))) {
             
             String line;
+            String search = "";
             
             while ((line = reader.readLine()) != null)
-                readerI.read(reader, line);
+                readerI.read(reader, line, search);
             
         } catch (IOException e) { e.printStackTrace(); }
           catch (SecurityException e) { e.printStackTrace(); }
