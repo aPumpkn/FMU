@@ -14,9 +14,12 @@ final public class FileOps {
     public static class FileOpsTask {
         
         private String result;
+        private boolean isCancelled = false;
         
-        public void setResult(String result) { this.result = result; }
-        public String getResult() { return result; }
+        public void result(String result) { this.result = result; }
+        public String result() { return result; }
+        public void cancel() { isCancelled = true; }
+        public boolean isCancelled() { return isCancelled; }
         
     }
     
@@ -53,12 +56,12 @@ final public class FileOps {
             String line;
             String search = "";
             
-            while ((line = reader.readLine()) != null)
+            while (!task.isCancelled() && (line = reader.readLine()) != null)
                 readerI.read(task, reader, line, search);
             
         } catch (IOException e) { e.printStackTrace(); }
           catch (SecurityException e) { e.printStackTrace(); }
-          return task.getResult();
+          return task.result();
         
     }
     
