@@ -8,6 +8,17 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 final public class FileOps {
+
+    private FileOps() {}
+    
+    public static class FileOpsTask {
+        
+        private String result;
+        
+        public void setResult(String result) { this.result = result; }
+        public String getResult() { return result; }
+        
+    }
     
         // -- FUNC. INTERFACES -- \\
 
@@ -15,12 +26,10 @@ final public class FileOps {
     public interface FunctionalBufferedReader { void read(BufferedReader reader) throws IOException, SecurityException; }
 
     @FunctionalInterface
-    public interface FunctionalBufferedLineReader { void read(BufferedReader reader, String line, String search) throws IOException, SecurityException; }
+    public interface FunctionalBufferedLineReader { void read(FileOpsTask task, BufferedReader reader, String line, String search) throws IOException, SecurityException; }
 
     @FunctionalInterface
     public interface FunctionalPrintWriter { void write(PrintWriter writer); }
-    
-    
     
         // -- READERS -- \\
 
@@ -35,7 +44,9 @@ final public class FileOps {
         
     }
     
-    public static void readTextFile(String path, FunctionalBufferedLineReader readerI) {
+    public static String readTextFile(String path, FunctionalBufferedLineReader readerI) {
+        
+        FileOpsTask task = new FileOpsTask();
         
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(path))) {
             
@@ -43,10 +54,11 @@ final public class FileOps {
             String search = "";
             
             while ((line = reader.readLine()) != null)
-                readerI.read(reader, line, search);
+                readerI.read(task, reader, line, search);
             
         } catch (IOException e) { e.printStackTrace(); }
           catch (SecurityException e) { e.printStackTrace(); }
+          return task.getResult();
         
     }
     
