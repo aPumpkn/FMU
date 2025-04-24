@@ -7,18 +7,44 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import net.pumpkin.fmu.io.reader.FunctionalBufferedReader;
-import net.pumpkin.fmu.io.writer.FunctionalPrintWriter;
-
 final public class FileOps {
+    
+        // -- FUNC. INTERFACES -- \\
+
+    @FunctionalInterface
+    public interface FunctionalBufferedReader { void read(BufferedReader reader) throws IOException, SecurityException; }
+
+    @FunctionalInterface
+    public interface FunctionalBufferedLineReader { void read(BufferedReader reader, String line) throws IOException, SecurityException; }
+
+    @FunctionalInterface
+    public interface FunctionalPrintWriter { void write(PrintWriter writer); }
+    
     
         // -- READERS -- \\
     
+    public static void readTextFile(String path, FunctionalBufferedLineReader readerI) {
+        
+        try (BufferedReader reader = Files.newBufferedReader(Paths.get(path))) {
+            
+            String line;
+            
+            while ((line = reader.readLine()) != null)
+                readerI.read(reader, line);
+            
+        } catch (IOException e) { e.printStackTrace(); }
+          catch (SecurityException e) { e.printStackTrace(); }
+        
+    }
+
     public static void readTextFile(String path, FunctionalBufferedReader readerI) {
         
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(path))) {
             
-            readerI.read(reader);
+            String line;
+            
+            while ((line = reader.readLine()) != null)
+                readerI.read(reader);
             
         } catch (IOException e) { e.printStackTrace(); }
           catch (SecurityException e) { e.printStackTrace(); }
