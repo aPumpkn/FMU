@@ -21,7 +21,19 @@ final public class FileOps {
     public interface FunctionalPrintWriter { void write(PrintWriter writer); }
     
     
+    
         // -- READERS -- \\
+
+    public static void readTextFile(String path, FunctionalBufferedReader readerI) {
+        
+        try (BufferedReader reader = Files.newBufferedReader(Paths.get(path))) {
+            
+            readerI.read(reader);
+            
+        } catch (IOException e) { e.printStackTrace(); }
+          catch (SecurityException e) { e.printStackTrace(); }
+        
+    }
     
     public static void readTextFile(String path, FunctionalBufferedLineReader readerI) {
         
@@ -31,20 +43,6 @@ final public class FileOps {
             
             while ((line = reader.readLine()) != null)
                 readerI.read(reader, line);
-            
-        } catch (IOException e) { e.printStackTrace(); }
-          catch (SecurityException e) { e.printStackTrace(); }
-        
-    }
-
-    public static void readTextFile(String path, FunctionalBufferedReader readerI) {
-        
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get(path))) {
-            
-            String line;
-            
-            while ((line = reader.readLine()) != null)
-                readerI.read(reader);
             
         } catch (IOException e) { e.printStackTrace(); }
           catch (SecurityException e) { e.printStackTrace(); }
