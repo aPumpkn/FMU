@@ -2,11 +2,11 @@ package net.pumpkin.fmu.io.reader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import net.pumpkin.fmu.io.AppFile;
+import net.pumpkin.fmu.io.FileOps;
 import net.pumpkin.fmu.io.editor.internal.MemoryEditor;
 
 /*
@@ -21,13 +21,13 @@ public interface TextFileReader {
      */
     default MemoryEditor extract(AppFile file) {
         
-        Map<String,String> map = null;
+        final Map<String,String> map = new LinkedHashMap<>();
         
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get(file.getPath()))) { 
+        FileOps.readTextFile(file.getPath(), reader -> {
             
-            map = read(reader);
+            map.putAll(read(reader));
             
-        } catch (IOException e) { e.printStackTrace(); }
+        });
         
         return new MemoryEditor(file, map);
         

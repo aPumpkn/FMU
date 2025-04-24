@@ -1,18 +1,18 @@
 package net.pumpkin.fmu.io.writer;
-
-import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.Map;
+
+import net.pumpkin.fmu.io.FileOps;
 
 public interface TextFileWriter {
     
     default void store(String path, Map<String,String> bag) {
         
-        try (PrintWriter writer = new PrintWriter(path)) {
+        FileOps.writeTextFile(path, writer -> { 
             
-            write(writer, bag);
+            write(writer, bag); 
             
-        } catch (FileNotFoundException e) { e.printStackTrace(); }
+        });
         
     }
     
