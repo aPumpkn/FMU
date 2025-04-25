@@ -14,11 +14,14 @@ final public class FileOps {
     public static class FileOpsTask {
         
         private String result;
+        private String search = "";
         private boolean isCancelled = false;
         
+        public void search(String search) { this.search = search; }
         public void result(String result) { this.result = result; }
+        public void stop() { isCancelled = true; }
+        public String search() { return search; }
         public String result() { return result; }
-        public void cancel() { isCancelled = true; }
         public boolean isCancelled() { return isCancelled; }
         
     }
@@ -29,7 +32,7 @@ final public class FileOps {
     public interface FunctionalBufferedReader { void read(BufferedReader reader) throws IOException, SecurityException; }
 
     @FunctionalInterface
-    public interface FunctionalBufferedLineReader { void read(FileOpsTask task, BufferedReader reader, String line, String search) throws IOException, SecurityException; }
+    public interface FunctionalBufferedLineReader { void read(FileOpsTask task, BufferedReader reader, String line) throws IOException, SecurityException; }
 
     @FunctionalInterface
     public interface FunctionalPrintWriter { void write(PrintWriter writer); }
@@ -54,10 +57,9 @@ final public class FileOps {
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(path))) {
             
             String line;
-            String search = "";
             
             while (!task.isCancelled() && (line = reader.readLine()) != null)
-                readerI.read(task, reader, line, search);
+                readerI.read(task, reader, line);
             
         } catch (IOException e) { e.printStackTrace(); }
           catch (SecurityException e) { e.printStackTrace(); }
