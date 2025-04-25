@@ -1,6 +1,6 @@
 package net.pumpkin.fmu.io.editor;
 
-public enum DataType {
+public enum EntryType {
     
     BYTE          ("b",       "byte"),
     SHORT         ("s",       "short"),
@@ -24,14 +24,14 @@ public enum DataType {
     private String symbol;
     private String name;
     
-    private DataType(String symbol, String name) {
+    private EntryType(String symbol, String name) {
         
         this.symbol = symbol;
         this.name = name;
         
     }
     
-    public static DataType ofString(String str) {
+    public static EntryType ofString(String str) {
         
         switch (str) {
             
@@ -96,7 +96,7 @@ public enum DataType {
         
     }
     
-    public static DataType ofSymbol(String str) {
+    public static EntryType ofSymbol(String str) {
         
         switch (str) {
             
