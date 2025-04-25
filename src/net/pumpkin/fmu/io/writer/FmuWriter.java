@@ -8,7 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import net.pumpkin.fmu.io.editor.DataType;
+import net.pumpkin.fmu.io.editor.EntryType;
 import net.pumpkin.fmu.utils.StringUtils;
 
 public class FmuWriter implements TextFileWriter {
@@ -45,7 +45,7 @@ public class FmuWriter implements TextFileWriter {
                     if (value != null) {
 
                         String literal = "";
-                        DataType type = null;
+                        EntryType type = null;
 
                         try (BufferedReader reader = new BufferedReader(new StringReader(value))) {
                             
@@ -57,7 +57,7 @@ public class FmuWriter implements TextFileWriter {
                                 
                                 if (firstLine) {
                                     
-                                    type = DataType.ofString(line);
+                                    type = EntryType.ofString(line);
                                     firstLine = false;
                                     
                                     if (!type.isArray()) {

@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import net.pumpkin.fmu.io.editor.DataType;
+import net.pumpkin.fmu.io.editor.EntryType;
 
 public class FmuReader implements TextFileReader {
     
@@ -64,7 +64,7 @@ public class FmuReader implements TextFileReader {
                 } else {
                     
                     String symbol = value.charAt(value.length() - 1) + "";
-                    DataType dataType = DataType.ofSymbol(symbol);
+                    EntryType dataType = EntryType.ofSymbol(symbol);
                     value = dataType.toString() + "\n" + (dataType.isWrapped() 
                             ? value.substring(1, value.length() - 1)
                             : value.substring(0, value.length() - 1));
