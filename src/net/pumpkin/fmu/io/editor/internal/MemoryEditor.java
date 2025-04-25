@@ -195,9 +195,9 @@ public class MemoryEditor implements DataEditor {
         try {
             
             entry = StringUtils.stripPath(entry);
-            
-            if (storage.get(entry) != null) throw new EntryFoundException();
+
             if (entry.isEmpty()) throw new IllegalArgumentException("The passed argument 'entry' cannot be a blank string.");
+            if (storage.get(entry) != null) throw new EntryFoundException();
                 
             String[] pathing = entry.split("/");
             
@@ -265,6 +265,26 @@ public class MemoryEditor implements DataEditor {
     }
 
     @Override
+    public DataEditor edit(String path, Object value) {
+        
+        try {
+            
+            path = StringUtils.stripPath(path);
+            
+            if (storage.get(path) == null)
+                throw new EntryNotFoundException();
+            
+            storage.put(path, EntryType.asString(value));
+            
+            if (!isChanged) isChanged = true;
+            
+        } catch (EntryNotFoundException e) { e.printStackTrace(); }
+        
+        return this;
+        
+    }
+
+    @Override
     public DataEditor rename(String field, String name, DataField fieldType) {
 
         try {
@@ -292,26 +312,6 @@ public class MemoryEditor implements DataEditor {
             
         } catch (FieldNotFoundException e) { e.printStackTrace(); } 
           catch (EntryNotFoundException e) { e.printStackTrace(); }
-        
-        return this;
-        
-    }
-
-    @Override
-    public DataEditor edit(String path, Object value) {
-        
-        try {
-            
-            path = StringUtils.stripPath(path);
-            
-            if (storage.get(path) == null)
-                throw new EntryNotFoundException();
-            
-            storage.put(path, EntryType.asString(value));
-            
-            if (!isChanged) isChanged = true;
-            
-        } catch (EntryNotFoundException e) { e.printStackTrace(); }
         
         return this;
         
