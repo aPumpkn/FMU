@@ -1,7 +1,6 @@
 package net.pumpkin.fmu.io.editor;
 
 import java.util.Collection;
-import java.util.Map;
 
 /*
  * Manages the given data which is accessed using a
@@ -16,20 +15,39 @@ import java.util.Map;
  */
 public interface DataEditor {
     
-    <T> T get(String path, DataType type);
-    Map<String,String> getEntries(String path);
-    Collection<String> getFields(String path);
-    boolean has(String path);
-    boolean hasField(String path);
+    public enum DataField {
+        
+        FIELD,
+        RECORD,
+        ENTRY;
+        
+        public boolean isEntry() {
+            
+            if (this == FIELD || this == ENTRY) return true;
+            return false;
+            
+        }
+
+        public boolean isRecord() {
+            
+            if (this == FIELD || this == RECORD) return true;
+            return false;
+            
+        }
+        
+    }
+    
+    <T> T get(String path, EntryType type);
+    Collection<String> collect(String path, DataField field);
+    boolean has(String path, DataField field);
     
     DataEditor add(String path, Object value);
-    DataEditor rename(String path, String name);
+    DataEditor add(String path);
+    DataEditor set(String path, Object value);
+    DataEditor set(String path);
     DataEditor edit(String path, Object value);
-    DataEditor remove(String path);
-    DataEditor addField(String path);
-    DataEditor addFields(String path);
-    DataEditor renameField(String path, String name);
-    DataEditor removeField(String path);
+    DataEditor rename(String path, String name, DataField field);
+    DataEditor remove(String path, DataField field);
     
     void complete();
     
