@@ -32,7 +32,7 @@ final public class FileOps {
     public interface FunctionalBufferedReader { void read(BufferedReader reader) throws IOException, SecurityException; }
 
     @FunctionalInterface
-    public interface FunctionalBufferedLineReader { void read(FileOpsTask task, BufferedReader reader, String line) throws IOException, SecurityException; }
+    public interface FunctionalBufferedReaderLoop { void read(FileOpsTask task, BufferedReader reader, String line) throws IOException, SecurityException; }
 
     @FunctionalInterface
     public interface FunctionalPrintWriter { void write(PrintWriter writer); }
@@ -50,7 +50,7 @@ final public class FileOps {
         
     }
     
-    public static String readTextFile(String path, FunctionalBufferedLineReader readerI) {
+    public static String readTextFile(String path, FunctionalBufferedReaderLoop readerI) {
         
         FileOpsTask task = new FileOpsTask();
         
