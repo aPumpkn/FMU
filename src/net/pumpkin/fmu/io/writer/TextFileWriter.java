@@ -2,7 +2,7 @@ package net.pumpkin.fmu.io.writer;
 import java.io.PrintWriter;
 import java.util.Map;
 
-import net.pumpkin.fmu.io.FileOps;
+import net.pumpkin.fmu.utils.FileOps;
 
 public interface TextFileWriter {
     

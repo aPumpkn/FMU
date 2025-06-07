@@ -1,4 +1,4 @@
-package net.pumpkin.fmu.io.editor.internal;
+package net.pumpkin.fmu.io.editor;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,8 +14,6 @@ import net.pumpkin.fmu.exceptions.EntryNotFoundException;
 import net.pumpkin.fmu.exceptions.FieldFoundException;
 import net.pumpkin.fmu.exceptions.FieldNotFoundException;
 import net.pumpkin.fmu.io.AppFile;
-import net.pumpkin.fmu.io.editor.DataEditor;
-import net.pumpkin.fmu.io.editor.EntryType;
 import net.pumpkin.fmu.io.writer.FmuWriter;
 import net.pumpkin.fmu.io.writer.TextFileWriter;
 import net.pumpkin.fmu.utils.StringUtils;
@@ -130,7 +128,7 @@ public class MemoryEditor implements DataEditor {
             if (storage.get(path) != null)
                 throw new EntryFoundException();
             
-            if (!path.isEmpty()) {
+            if (path.contains("/")) {
                 
                 String[] pathing = path.split("/");
                 String parent = "";

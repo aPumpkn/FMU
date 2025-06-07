@@ -305,7 +305,8 @@ public enum EntryType {
         
     }
     
-    public <T> T parse(String value) {
+    @SuppressWarnings("unchecked")
+	public <T> T parse(String value) {
         
         switch (this) {
             

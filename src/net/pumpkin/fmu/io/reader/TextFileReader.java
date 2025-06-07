@@ -6,8 +6,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import net.pumpkin.fmu.io.AppFile;
-import net.pumpkin.fmu.io.FileOps;
-import net.pumpkin.fmu.io.editor.internal.MemoryEditor;
+import net.pumpkin.fmu.io.editor.MemoryEditor;
+import net.pumpkin.fmu.utils.FileOps;
 
 /*
  * Responsible for reading the full contents of a file.

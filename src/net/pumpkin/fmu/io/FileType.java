@@ -5,7 +5,7 @@ public enum FileType {
     
     FMU,      // Specific for this API
     BLANK,    // Has no extension
-    UNKNOWN;  // Is not a recognizeable extension
+    UNKNOWN;  // Is not a recognizable extension
  
     @Override
     public String toString() {

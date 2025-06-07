@@ -18,14 +18,13 @@ public class FmuWriter implements TextFileWriter {
         
         Map<String,String> queue = new LinkedHashMap<>(); // Elements to store for a given path
         String indent = ""; // tab for readability
-        String search = ""; // the current navigational path
+        String search = ""; // the current navigable path
         
         while (!bag.isEmpty()) {
             
             for (Entry<String,String> entry : bag.entrySet()) { // Setup the queue for this path
                 
                 String[] split = entry.getKey().split("/");
-                String key = split[split.length - 1];
                 String parent = "";
                 
                 for (int i = 0; i < split.length - 1; i++)
@@ -36,8 +35,9 @@ public class FmuWriter implements TextFileWriter {
                 
             } if (!queue.isEmpty()) { // if we have elements to write
                 
-                for (Entry<String,String> entry : queue.entrySet()) { // set down all entries first, if any
-                    
+                for (Entry<String,String> entry : queue.entrySet()) { 
+                	
+                	// set down all entries first, if any
                     String[] split = entry.getKey().split("/");
                     String key = split[split.length - 1];
                     String value = entry.getValue();
@@ -84,8 +84,9 @@ public class FmuWriter implements TextFileWriter {
                         
                     }
                     
-                } for (String i : queue.keySet()) { // if there are any fields in queue, write the first one and update the search query
-                    
+                } for (String i : queue.keySet()) { 
+                	
+                	// if there are any fields in queue, write the first one and update the search query
                     String value = queue.get(i);
                     String[] split = i.split("/");
                     String key = split[split.length - 1];
@@ -105,7 +106,7 @@ public class FmuWriter implements TextFileWriter {
                 
                 queue.clear(); // queue is complete
                 
-            } else if (!bag.isEmpty() && !indent.isEmpty()) { // Nothing left to write here, so go back one navigational step if possible.
+            } else if (!bag.isEmpty() && !indent.isEmpty()) { // Nothing left to write here, so go back one navigable step if possible.
                 
                 indent = indent.substring(4);
                 String[] split = search.split("/");
